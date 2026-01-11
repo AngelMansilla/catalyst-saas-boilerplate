@@ -59,6 +59,12 @@
             <artifactId>bucket4j-redis</artifactId>
         </dependency>
         
+        <!-- Jackson (required explicitly in Spring Boot 4.x) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
