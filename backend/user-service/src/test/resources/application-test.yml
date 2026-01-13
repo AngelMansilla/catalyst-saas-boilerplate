@@ -1,0 +1,62 @@
+# Test Configuration for User Service
+spring:
+  application:
+    name: user-service-test
+  
+  # Use Testcontainers for database
+  datasource:
+    url: jdbc:tc:postgresql:16:///catalyst_test?TC_DAEMON=true
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    hikari:
+      maximum-pool-size: 5
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: auth
+    show-sql: true
+  
+  flyway:
+    enabled: false
+  
+  # Embedded Kafka for testing
+  kafka:
+    bootstrap-servers: ${spring.embedded.kafka.brokers:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# JWT for tests
+security:
+  jwt:
+    secret: test-secret-key-for-jwt-signing-must-be-at-least-32-characters-long
+    access-token-expiration: 900000
+    refresh-token-expiration: 604800000
+    issuer: catalyst-user-service-test
+
+# Password reset for tests
+user:
+  password-reset:
+    token-expiration-hours: 24
+    token-length: 64
+  internal-api-key: test-internal-api-key
+
+# Encryption for tests
+encryption:
+  algorithm: AES/GCM/NoPadding
+  key: test-encryption-key-32-chars-!!
+
+# Disable rate limiting in tests
+rate-limit:
+  enabled: false
+
+# Logging for tests
+logging:
+  level:
+    root: WARN
+    com.catalyst.user: DEBUG
+    org.springframework.security: DEBUG
+

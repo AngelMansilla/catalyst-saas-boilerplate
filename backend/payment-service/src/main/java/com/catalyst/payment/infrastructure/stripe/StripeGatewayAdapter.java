@@ -187,10 +187,14 @@ public class StripeGatewayAdapter implements StripeGateway {
     public StripeWebhookEvent parseWebhookEvent(String payload, String signature) {
         try {
             Event event = Webhook.constructEvent(payload, signature, webhookSecret);
+            // Use EventDataObjectDeserializer instead of deprecated getData().getObject()
+            Object dataObject = event.getDataObjectDeserializer()
+                .getObject()
+                .orElse(null);
             return new StripeWebhookEvent(
                 event.getId(),
                 event.getType(),
-                event.getData().getObject()
+                dataObject
             );
         } catch (SignatureVerificationException e) {
             log.error("Failed to parse webhook event", e);

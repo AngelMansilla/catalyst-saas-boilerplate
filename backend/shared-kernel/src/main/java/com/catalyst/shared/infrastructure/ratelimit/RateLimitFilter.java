@@ -14,7 +14,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
+import jakarta.annotation.Nonnull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -57,9 +57,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
     
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+            @Nonnull HttpServletRequest request,
+            @Nonnull HttpServletResponse response,
+            @Nonnull FilterChain filterChain) throws ServletException, IOException {
         
         if (!properties.isEnabled()) {
             filterChain.doFilter(request, response);
@@ -125,7 +125,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
     
     @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+    protected boolean shouldNotFilter(@Nonnull HttpServletRequest request) {
         String path = request.getServletPath();
         // Skip rate limiting for health checks and static resources
         return path.startsWith("/actuator/health") ||

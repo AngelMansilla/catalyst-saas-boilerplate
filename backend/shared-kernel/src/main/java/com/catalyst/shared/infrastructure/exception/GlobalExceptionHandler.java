@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessRuleViolationException.class)
     public ResponseEntity<Map<String, Object>> handleBusinessRule(
             BusinessRuleViolationException ex, HttpServletRequest request) {
-        return handleDomainException(ex, request, HttpStatus.UNPROCESSABLE_ENTITY);
+        return handleDomainException(ex, request, HttpStatus.valueOf(422));
     }
     
     @ExceptionHandler(RateLimitExceededException.class)

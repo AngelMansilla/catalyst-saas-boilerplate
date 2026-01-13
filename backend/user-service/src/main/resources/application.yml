@@ -1,0 +1,141 @@
+# Catalyst User Service Configuration
+# Phase 4: Authentication and User Management
+
+server:
+  port: 8081
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: user-service
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:catalyst_db}
+    username: ${DB_USERNAME:catalyst}
+    password: ${DB_PASSWORD:catalyst_secret}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_schema: auth
+    show-sql: ${SHOW_SQL:false}
+    open-in-view: false
+  
+  # Flyway Configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    schemas: auth
+    baseline-on-migrate: true
+    validate-on-migrate: true
+  
+  # Redis Configuration (for sessions and rate limiting)
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+  
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+
+# JWT Configuration (from shared-kernel)
+security:
+  jwt:
+    secret: ${JWT_SECRET:your-256-bit-secret-key-for-jwt-signing-must-be-at-least-32-chars}
+    access-token-expiration: ${JWT_ACCESS_EXPIRATION:900000}
+    refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+    issuer: catalyst-user-service
+
+# Password Reset Configuration
+user:
+  password-reset:
+    token-expiration-hours: ${PASSWORD_RESET_EXPIRATION:24}
+    token-length: 64
+  
+  # Internal API Key for NextAuth sync
+  internal-api-key: ${INTERNAL_API_KEY:dev-internal-api-key-change-in-production}
+
+# Kafka Topics
+kafka:
+  topics:
+    user-registered: user.registered
+    user-logged-in: user.logged-in
+    password-reset-requested: user.password-reset-requested
+    password-reset-completed: user.password-reset-completed
+
+# Encryption (from shared-kernel)
+encryption:
+  algorithm: AES/GCM/NoPadding
+  key: ${ENCRYPTION_KEY:your-32-char-encryption-key-here}
+
+# Rate Limiting
+rate-limit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+  anonymous:
+    requests-per-minute: 30
+  authenticated:
+    requests-per-minute: 100
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.catalyst.user: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_PARAMS_LOG:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# OpenAPI Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  info:
+    title: Catalyst User Service API
+    description: Authentication and user management endpoints
+    version: 0.1.0
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
