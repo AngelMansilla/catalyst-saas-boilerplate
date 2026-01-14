@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<body>
+    <div layout:fragment="content">
+        <h1 style="color: #1A2B3C; margin-bottom: 16px;" 
+            th:text="#{email.paymentReceipt.title}">
+            Payment Confirmation
+        </h1>
+        
+        <p th:text="#{email.paymentReceipt.greeting(${userName})}">
+            Hello User,
+        </p>
+        
+        <p th:text="#{email.paymentReceipt.message}">
+            We've received your payment. Here are the details:
+        </p>
+        
+        <div style="background-color: #F8F9FA; border: 1px solid #DEE2E6; border-radius: 6px; padding: 20px; margin: 24px 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; font-weight: 600;" th:text="#{email.paymentReceipt.amount}">Amount Paid</td>
+                    <td style="padding: 8px 0; text-align: right;" th:text="${amount}">$29.00</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: 600;" th:text="#{email.paymentReceipt.date}">Payment Date</td>
+                    <td style="padding: 8px 0; text-align: right;" th:text="${paymentDate}">January 15, 2026</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: 600;" th:text="#{email.paymentReceipt.plan}">Plan</td>
+                    <td style="padding: 8px 0; text-align: right;" th:text="${planName}">Professional</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: 600;" th:text="#{email.paymentReceipt.period}">Billing Period</td>
+                    <td style="padding: 8px 0; text-align: right;" th:text="${billingPeriod}">Monthly</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin: 32px 0;">
+            <a th:href="${invoiceUrl}" 
+               class="btn-primary"
+               th:text="#{email.paymentReceipt.cta}">
+                View Invoice
+            </a>
+        </div>
+        
+        <p th:text="#{email.paymentReceipt.thanks}">
+            Thank you for your continued trust in Catalyst.
+        </p>
+        
+        <p style="margin-top: 24px;">
+            <span th:text="#{email.common.regards}">Best regards,</span><br/>
+            <strong th:text="#{email.common.team}">The Catalyst Team</strong>
+        </p>
+    </div>
+</body>
+</html>
+

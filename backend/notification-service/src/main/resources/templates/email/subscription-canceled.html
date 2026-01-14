@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<body>
+    <div layout:fragment="content">
+        <h1 style="color: #1A2B3C; margin-bottom: 16px;" 
+            th:text="#{email.subscriptionCanceled.title}">
+            We're Sorry to See You Go
+        </h1>
+        
+        <p th:text="#{email.subscriptionCanceled.greeting(${userName})}">
+            Hello User,
+        </p>
+        
+        <p th:text="#{email.subscriptionCanceled.message}">
+            Your subscription has been canceled as requested.
+        </p>
+        
+        <p th:text="#{email.subscriptionCanceled.access(${accessEndDate})}">
+            You'll continue to have access until January 31, 2026.
+        </p>
+        
+        <p th:text="#{email.subscriptionCanceled.data}">
+            Your data will be retained for 30 days in case you change your mind.
+        </p>
+        
+        <div style="text-align: center; margin: 32px 0;">
+            <a th:href="${reactivateUrl}" 
+               class="btn-secondary"
+               th:text="#{email.subscriptionCanceled.cta}">
+                Reactivate Subscription
+            </a>
+        </div>
+        
+        <p th:text="#{email.subscriptionCanceled.feedback}">
+            We'd love to hear why you're leaving. Your feedback helps us improve.
+        </p>
+        
+        <p style="margin-top: 24px;">
+            <span th:text="#{email.common.regards}">Best regards,</span><br/>
+            <strong th:text="#{email.common.team}">The Catalyst Team</strong>
+        </p>
+    </div>
+</body>
+</html>
+

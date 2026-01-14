@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<body>
+    <div layout:fragment="content">
+        <h1 style="color: #1A2B3C; margin-bottom: 16px;" 
+            th:text="#{email.subscriptionCreated.title}">
+            Subscription Confirmed
+        </h1>
+        
+        <p th:text="#{email.subscriptionCreated.greeting(${userName})}">
+            Hello User,
+        </p>
+        
+        <p th:text="#{email.subscriptionCreated.message(${planName})}">
+            Thank you for subscribing to the Professional plan.
+        </p>
+        
+        <div th:if="${trialEndDate != null}" style="background-color: #D1ECF1; border-left: 4px solid #17A2B8; padding: 12px; margin: 24px 0;">
+            <p style="margin: 0; color: #0C5460;" th:text="#{email.subscriptionCreated.trialInfo(${trialEndDate})}">
+                Your free trial ends on January 20, 2026. You won't be charged until then.
+            </p>
+        </div>
+        
+        <p th:text="#{email.subscriptionCreated.features}">
+            Here's what you get:
+        </p>
+        
+        <ul>
+            <li th:each="feature : ${features}" th:text="${feature}">Feature</li>
+        </ul>
+        
+        <div style="text-align: center; margin: 32px 0;">
+            <a th:href="${dashboardUrl}" 
+               class="btn-primary"
+               th:text="#{email.subscriptionCreated.cta}">
+                Explore Features
+            </a>
+        </div>
+        
+        <p th:text="#{email.subscriptionCreated.billing}">
+            You can manage your subscription anytime from your account settings.
+        </p>
+        
+        <p style="margin-top: 24px;">
+            <span th:text="#{email.common.regards}">Best regards,</span><br/>
+            <strong th:text="#{email.common.team}">The Catalyst Team</strong>
+        </p>
+    </div>
+</body>
+</html>
+

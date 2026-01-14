@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<body>
+    <div layout:fragment="content">
+        <h1 style="color: #1A2B3C; margin-bottom: 16px;" 
+            th:text="#{email.trialExpired.title}">
+            Trial Period Complete
+        </h1>
+        
+        <p th:text="#{email.trialExpired.greeting(${userName})}">
+            Hello User,
+        </p>
+        
+        <p th:text="#{email.trialExpired.message}">
+            Your free trial of Catalyst has come to an end.
+        </p>
+        
+        <p th:text="#{email.trialExpired.value}">
+            During your trial, you experienced:
+        </p>
+        
+        <ul>
+            <li th:each="feature : ${trialFeatures}" th:text="${feature}">Feature</li>
+        </ul>
+        
+        <div style="text-align: center; margin: 32px 0;">
+            <a th:href="${pricingUrl}" 
+               class="btn-primary"
+               th:text="#{email.trialExpired.cta}">
+                Choose a Plan
+            </a>
+        </div>
+        
+        <div style="background-color: #D1ECF1; border-left: 4px solid #17A2B8; padding: 12px; margin: 24px 0;">
+            <p style="margin: 0; color: #0C5460;" th:text="#{email.trialExpired.discount}">
+                Use code WELCOME20 for 20% off your first month!
+            </p>
+        </div>
+        
+        <p th:text="#{email.trialExpired.help}">
+            Have questions? We're here to help you find the right plan.
+        </p>
+        
+        <p style="margin-top: 24px;">
+            <span th:text="#{email.common.regards}">Best regards,</span><br/>
+            <strong th:text="#{email.common.team}">The Catalyst Team</strong>
+        </p>
+    </div>
+</body>
+</html>
+

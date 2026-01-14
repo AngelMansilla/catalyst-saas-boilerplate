@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <th:block th:fragment="button-primary(href, text)">
+        <div style="text-align: center; margin: 24px 0;">
+            <a th:href="${href}" class="btn-primary" th:text="${text}">Button</a>
+        </div>
+    </th:block>
+</body>
+</html>
+

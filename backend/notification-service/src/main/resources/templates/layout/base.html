@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${subject}">Catalyst</title>
+    <style>
+        /* Email-safe CSS (inline-friendly) */
+        :root {
+            --brand-primary: #1A2B3C;    /* Navy Blue */
+            --brand-accent: #2ECC71;      /* Emerald Green */
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --background: #F5F5F5;
+            --white: #FFFFFF;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--background);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--white);
+        }
+        
+        .header {
+            background-color: var(--brand-primary);
+            padding: 24px;
+            text-align: center;
+        }
+        
+        .header img {
+            height: 40px;
+        }
+        
+        .content {
+            padding: 32px 24px;
+        }
+        
+        .footer {
+            background-color: var(--background);
+            padding: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .btn-primary {
+            display: inline-block;
+            background-color: var(--brand-accent);
+            color: var(--white);
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        .btn-secondary {
+            display: inline-block;
+            background-color: transparent;
+            color: var(--brand-primary);
+            padding: 12px 24px;
+            text-decoration: none;
+            border: 2px solid var(--brand-primary);
+            border-radius: 6px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <img th:src="${logoUrl}" alt="Catalyst" />
+        </div>
+        
+        <!-- Content (injected from child templates) -->
+        <div class="content" layout:fragment="content">
+            <!-- Child template content goes here -->
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p th:text="#{email.footer.company}">© 2026 Catalyst. All rights reserved.</p>
+            <p>
+                <a th:href="${baseUrl}" th:text="#{email.footer.website}">Website</a> |
+                <a th:href="${baseUrl + '/settings'}" th:text="#{email.footer.preferences}">Email Preferences</a>
+            </p>
+            <p th:text="#{email.footer.address}">Your Company Address</p>
+        </div>
+    </div>
+</body>
+</html>
+
