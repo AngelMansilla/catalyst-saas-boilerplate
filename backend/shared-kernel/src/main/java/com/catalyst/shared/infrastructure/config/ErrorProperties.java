@@ -24,4 +24,3 @@ public class ErrorProperties {
         this.includeStacktrace = includeStacktrace;
     }
 }
-
