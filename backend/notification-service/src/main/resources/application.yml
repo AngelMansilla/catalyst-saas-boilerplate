@@ -122,6 +122,19 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
+# OpenAPI Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  info:
+    title: Catalyst Notification Service API
+    description: Event-driven notification service with email support
+    version: 0.1.0
+
 # Actuator
 management:
   endpoints:
