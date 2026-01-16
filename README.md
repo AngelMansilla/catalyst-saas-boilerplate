@@ -2,8 +2,8 @@
 
 > Elite reusable boilerplate with robust payment system (Stripe) and authentication - Built to GrayHair Standard
 
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-green.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.1-green.svg)](https://spring.io/projects/spring-boot)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
@@ -15,7 +15,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 ### 🌟 Engineering Highlights
 
 - **Clean Architecture**: Strict adherence to Hexagonal Architecture (Ports & Adapters) to isolate domain logic from external frameworks.
-- **Modern Concurrency**: Leveraging **Java 21 Virtual Threads** for superior performance and resource efficiency.
+- **Modern Concurrency**: Leveraging **Java 25 LTS Virtual Threads** for superior performance and resource efficiency.
 - **Enterprise Security**: Layered security model with Spring Security, JWT validation, and multi-schema database isolation.
 - **Event-Driven Resilience**: Asynchronous communication via **Apache Kafka (KRaft mode)** for high availability and decoupled services.
 - **Observability**: Built-in audit logging and health monitoring for all infrastructure components.
@@ -26,7 +26,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 - 🔐 **Robust Authentication**: Social login with NextAuth.js + JWT with Spring Security
 - 🏗️ **Hexagonal Architecture**: Clean, maintainable, and testable code
 - 📨 **Event-Driven**: Apache Kafka for asynchronous processing
-- ⚡ **High Performance**: Java 21 Virtual Threads + Redis caching
+- ⚡ **High Performance**: Java 25 LTS Virtual Threads + Redis caching
 - 🎨 **Modern UI**: Next.js 15 + Shadcn/UI + Tailwind CSS
 - 🐳 **Containerized**: Docker-ready infrastructure
 - 🧪 **Well Tested**: Comprehensive test coverage with JUnit, Vitest, and Playwright
@@ -34,8 +34,8 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 ## 🛠️ Tech Stack
 
 ### Backend
-- **Java 21** with Virtual Threads
-- **Spring Boot 3.4** (Framework)
+- **Java 25 LTS** with Virtual Threads (Premier Support until 2030)
+- **Spring Boot 4.0.1** (Framework)
 - **Maven** (Build tool)
 - **PostgreSQL 16** (Database)
 - **Redis 7** (Caching)
