@@ -2,6 +2,7 @@ package com.catalyst.notification.application.service;
 
 import com.catalyst.notification.application.dto.NotificationResponse;
 import com.catalyst.notification.application.dto.SendNotificationRequest;
+import com.catalyst.notification.application.ports.input.GetNotificationUseCase;
 import com.catalyst.notification.application.ports.input.SendNotificationUseCase;
 import com.catalyst.notification.application.ports.output.EmailSender;
 import com.catalyst.notification.application.ports.output.NotificationRepository;
@@ -9,7 +10,9 @@ import com.catalyst.notification.application.ports.output.TemplateRenderer;
 import com.catalyst.notification.domain.exception.EmailDeliveryException;
 import com.catalyst.notification.domain.model.Notification;
 import com.catalyst.notification.domain.valueobject.EmailAddress;
+import com.catalyst.notification.domain.valueobject.NotificationId;
 
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class NotificationApplicationService implements SendNotificationUseCase {
+public class NotificationApplicationService implements SendNotificationUseCase, GetNotificationUseCase {
     
     private static final Logger log = LoggerFactory.getLogger(NotificationApplicationService.class);
     
@@ -86,6 +89,14 @@ public class NotificationApplicationService implements SendNotificationUseCase {
             log.error("Error processing notification: {}", e.getMessage(), e);
             throw e;
         }
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<NotificationResponse> getById(NotificationId id) {
+        log.debug("Retrieving notification by ID: {}", id);
+        return notificationRepository.findById(id)
+            .map(NotificationResponse::fromDomain);
     }
 }
 
