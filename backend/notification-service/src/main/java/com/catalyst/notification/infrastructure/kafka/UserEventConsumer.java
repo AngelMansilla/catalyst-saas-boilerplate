@@ -2,7 +2,6 @@ package com.catalyst.notification.infrastructure.kafka;
 
 import com.catalyst.notification.application.dto.SendNotificationRequest;
 import com.catalyst.notification.application.ports.input.SendNotificationUseCase;
-import com.catalyst.notification.domain.valueobject.EmailAddress;
 import com.catalyst.notification.domain.valueobject.NotificationType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +59,6 @@ public class UserEventConsumer {
         try {
             JsonNode envelope = objectMapper.readTree(message);
             JsonNode payload = envelope.get("payload");
-            JsonNode metadata = envelope.get("metadata");
             
             String email = payload.get("email").asText();
             String name = payload.get("name").asText();
@@ -105,7 +103,6 @@ public class UserEventConsumer {
             
             String email = payload.get("email").asText();
             String token = payload.get("token").asText();
-            String expiresAt = payload.get("expiresAt").asText();
             
             Map<String, Object> templateData = new HashMap<>();
             templateData.put("userName", email.split("@")[0]); // Extract name from email

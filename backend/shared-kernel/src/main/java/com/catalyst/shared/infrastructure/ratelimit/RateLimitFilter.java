@@ -7,8 +7,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -32,7 +30,6 @@ import java.time.Instant;
 @EnableConfigurationProperties(RateLimitProperties.class)
 public class RateLimitFilter extends OncePerRequestFilter {
     
-    private static final Logger log = LoggerFactory.getLogger(RateLimitFilter.class);
     
     private static final String HEADER_LIMIT = "X-RateLimit-Limit";
     private static final String HEADER_REMAINING = "X-RateLimit-Remaining";

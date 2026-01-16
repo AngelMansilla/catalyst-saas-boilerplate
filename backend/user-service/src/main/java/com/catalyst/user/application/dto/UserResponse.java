@@ -1,8 +1,6 @@
 package com.catalyst.user.application.dto;
 
-import com.catalyst.user.domain.model.AuthProvider;
 import com.catalyst.user.domain.model.User;
-import com.catalyst.user.domain.model.UserRole;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -1,7 +1,6 @@
 package com.catalyst.payment.infrastructure.persistence.mapper;
 
 import com.catalyst.payment.domain.model.Subscription;
-import com.catalyst.payment.domain.model.SubscriptionTier;
 import com.catalyst.payment.domain.valueobject.StripeSubscriptionId;
 import com.catalyst.payment.infrastructure.persistence.entity.SubscriptionJpaEntity;
 import org.springframework.stereotype.Component;

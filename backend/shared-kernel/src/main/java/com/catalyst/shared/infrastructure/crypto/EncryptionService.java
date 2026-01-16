@@ -35,10 +35,8 @@ public class EncryptionService implements EncryptionPort {
     private final SecretKey secretKey;
     private final SecureRandom secureRandom;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final CryptoProperties properties;
     
     public EncryptionService(CryptoProperties properties) {
-        this.properties = properties;
         this.secretKey = new SecretKeySpec(
             properties.getEncryptionKey().getBytes(StandardCharsets.UTF_8), 
             ALGORITHM

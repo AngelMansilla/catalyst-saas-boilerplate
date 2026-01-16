@@ -6,7 +6,6 @@ import com.catalyst.payment.domain.valueobject.StripeInvoiceId;
 import com.catalyst.payment.infrastructure.persistence.entity.InvoiceJpaEntity;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.Currency;
 
 /**
