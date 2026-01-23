@@ -6,9 +6,9 @@ spring:
     name: payment-service
   
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:catalyst}?currentSchema=payment
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:catalyst_db}?currentSchema=payment
     username: ${DB_USERNAME:catalyst}
-    password: ${DB_PASSWORD:catalyst}
+    password: ${DB_PASSWORD:catalyst_dev_password}
   
   jpa:
     hibernate:
@@ -123,3 +123,21 @@ logging:
     org.springframework.kafka: INFO
     org.flywaydb: INFO
 
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: ping
+        readiness:
+          include: db,redis,kafka
+        custom:
+          include: db,redis,kafka

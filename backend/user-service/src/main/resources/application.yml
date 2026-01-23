@@ -14,7 +14,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:catalyst_db}
     username: ${DB_USERNAME:catalyst}
-    password: ${DB_PASSWORD:catalyst_secret}
+    password: ${DB_PASSWORD:catalyst_dev_password}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -39,6 +39,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    default-schema: auth
     schemas: auth
     baseline-on-migrate: true
     validate-on-migrate: true
@@ -57,7 +58,7 @@ spring:
   
   # Kafka Configuration
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -67,13 +68,25 @@ spring:
         enable.idempotence: true
         max.in.flight.requests.per.connection: 5
 
-# JWT Configuration (from shared-kernel)
-security:
-  jwt:
-    secret: ${JWT_SECRET:your-256-bit-secret-key-for-jwt-signing-must-be-at-least-32-chars}
-    access-token-expiration: ${JWT_ACCESS_EXPIRATION:900000}
-    refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
-    issuer: catalyst-user-service
+# Catalyst Security Configuration (from shared-kernel)
+catalyst:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:your-256-bit-secret-key-for-jwt-signing-must-be-at-least-32-chars}
+      access-token-expiration: ${JWT_ACCESS_EXPIRATION:15m}
+      refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:7d}
+      issuer: catalyst-user-service
+    crypto:
+      encryption-key: ${ENCRYPTION_KEY:your-32-char-encryption-key-here}
+      bcrypt-strength: 12
+    rate-limit:
+      enabled: ${RATE_LIMIT_ENABLED:true}
+      anonymous:
+        requests-per-minute: 30
+        burst: 10
+      authenticated:
+        requests-per-minute: 100
+        burst: 20
 
 # Password Reset Configuration
 user:
@@ -91,19 +104,6 @@ kafka:
     user-logged-in: user.logged-in
     password-reset-requested: user.password-reset-requested
     password-reset-completed: user.password-reset-completed
-
-# Encryption (from shared-kernel)
-encryption:
-  algorithm: AES/GCM/NoPadding
-  key: ${ENCRYPTION_KEY:your-32-char-encryption-key-here}
-
-# Rate Limiting
-rate-limit:
-  enabled: ${RATE_LIMIT_ENABLED:true}
-  anonymous:
-    requests-per-minute: 30
-  authenticated:
-    requests-per-minute: 100
 
 # Logging
 logging:
@@ -138,4 +138,17 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+      probes:
+        enabled: true
+      # Disable strict validation to allow optional health indicators
+      validate-group-membership: false
+      group:
+        liveness:
+          include: ping
+        readiness:
+          # Kafka is optional - only included if KafkaHealthIndicator exists
+          include: db,redis
+        custom:
+          # Kafka is optional - only included if KafkaHealthIndicator exists
+          include: db,redis
 

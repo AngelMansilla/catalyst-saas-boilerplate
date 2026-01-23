@@ -14,7 +14,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:catalyst_db}
     username: ${DB_USERNAME:catalyst}
-    password: ${DB_PASSWORD:catalyst_secret}
+    password: ${DB_PASSWORD:catalyst_dev_password}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -144,4 +144,13 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: ping
+        readiness:
+          include: db,redis,kafka
+        custom:
+          include: db,redis,kafka
 
