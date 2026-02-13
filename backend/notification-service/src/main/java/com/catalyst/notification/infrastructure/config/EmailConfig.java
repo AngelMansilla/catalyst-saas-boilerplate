@@ -4,6 +4,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -29,7 +30,7 @@ public class EmailConfig {
     }
     
     @Bean
-    public SpringTemplateEngine templateEngine(SpringResourceTemplateResolver templateResolver) {
+    public SpringTemplateEngine templateEngine(@Qualifier("emailTemplateResolver") SpringResourceTemplateResolver templateResolver) {
         SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.setTemplateResolver(templateResolver);
         engine.setEnableSpringELCompiler(true);
