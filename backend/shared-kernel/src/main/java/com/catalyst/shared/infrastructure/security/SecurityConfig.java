@@ -68,7 +68,7 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/public/**").permitAll()
-                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 .requestMatchers("/actuator/info").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
