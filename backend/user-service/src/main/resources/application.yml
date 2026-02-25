@@ -130,6 +130,13 @@ springdoc:
     description: Authentication and user management endpoints
     version: 0.1.0
 
+# Sentry Error Tracking
+sentry:
+  dsn: ${SENTRY_DSN:https://3f24b13a76d0061553fc2f044cd33e5b@o4510947490988032.ingest.de.sentry.io/4510947495575632}
+  send-default-pii: true
+  traces-sample-rate: 1.0
+  exception-resolver-order: -2147483648 # Highest precedence to catch everything
+
 # Actuator
 management:
   endpoints:

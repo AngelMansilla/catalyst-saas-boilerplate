@@ -40,6 +40,7 @@
         <testcontainers.version>1.19.8</testcontainers.version>
         <archunit.version>1.2.1</archunit.version>
         <logstash-logback.version>7.4</logstash-logback.version>
+        <sentry.version>8.33.0</sentry.version>
     </properties>
 
     <dependencyManagement>
@@ -94,6 +95,15 @@
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash-logback.version}</version>
+            </dependency>
+
+            <!-- Sentry -->
+            <dependency>
+                <groupId>io.sentry</groupId>
+                <artifactId>sentry-bom</artifactId>
+                <version>${sentry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
