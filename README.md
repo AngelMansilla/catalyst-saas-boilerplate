@@ -23,7 +23,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 ### Key Features
 
 - 💳 **Stripe Integration**: Complete payment and subscription management
-- 🔐 **Robust Authentication**: Social login with NextAuth.js + JWT with Spring Security
+- 🔐 **Robust Authentication**: OIDC/OAuth2 Integration + JWT with Spring Security
 - 🏗️ **Hexagonal Architecture**: Clean, maintainable, and testable code
 - 📨 **Event-Driven**: Apache Kafka for asynchronous processing (Registration, Payments, Deletion)
 - ⚡ **High Performance**: Java 25 LTS Virtual Threads + Redis caching
@@ -47,7 +47,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 - **TypeScript** (Type safety)
 - **Tailwind CSS** (Styling)
 - **PrimeNG** (Optional Component System)
-- **OAuth2 / OIDC** (Authentication)
+- **OIDC / JWT** (Authentication)
 
 ### Infrastructure
 - **Docker** & **Docker Compose**
