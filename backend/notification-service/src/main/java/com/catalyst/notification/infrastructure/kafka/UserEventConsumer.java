@@ -3,11 +3,11 @@ package com.catalyst.notification.infrastructure.kafka;
 import com.catalyst.notification.application.dto.SendNotificationRequest;
 import com.catalyst.notification.application.ports.input.SendNotificationUseCase;
 import com.catalyst.notification.domain.valueobject.NotificationType;
+import com.catalyst.notification.infrastructure.config.NotificationProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -34,18 +34,17 @@ public class UserEventConsumer {
 
     private final SendNotificationUseCase sendNotificationUseCase;
     private final ObjectMapper objectMapper;
+    private final NotificationProperties properties;
 
-    @Value("${email.base-url:http://localhost:3000}")
-    private String baseUrl;
-
-    public UserEventConsumer(SendNotificationUseCase sendNotificationUseCase) {
+    public UserEventConsumer(SendNotificationUseCase sendNotificationUseCase, NotificationProperties properties) {
         log.info("Initializing UserEventConsumer...");
         this.sendNotificationUseCase = sendNotificationUseCase;
+        this.properties = properties;
         this.objectMapper = new ObjectMapper();
     }
 
     @RetryableTopic(attempts = "4", dltTopicSuffix = ".dlq", autoCreateTopics = "true", topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
-    @KafkaListener(topics = "${kafka.topics.user-registered:user.registered}")
+    @KafkaListener(topics = "#{notificationProperties.kafka.topics['user-registered']}")
     public void handleUserRegistered(
             @Payload String message,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
@@ -61,7 +60,7 @@ public class UserEventConsumer {
 
             Map<String, Object> templateData = new HashMap<>();
             templateData.put("userName", name);
-            templateData.put("dashboardUrl", baseUrl + "/dashboard");
+            templateData.put("dashboardUrl", properties.getEmail().getBaseUrl() + "/dashboard");
 
             SendNotificationRequest request = new SendNotificationRequest(
                     NotificationType.WELCOME,
@@ -80,7 +79,7 @@ public class UserEventConsumer {
     }
 
     @RetryableTopic(attempts = "4", dltTopicSuffix = ".dlq", autoCreateTopics = "true", topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
-    @KafkaListener(topics = "${kafka.topics.password-reset-requested:user.password-reset-requested}")
+    @KafkaListener(topics = "#{notificationProperties.kafka.topics['password-reset-requested']}")
     public void handlePasswordResetRequested(
             @Payload String message,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
@@ -96,7 +95,7 @@ public class UserEventConsumer {
 
             Map<String, Object> templateData = new HashMap<>();
             templateData.put("userName", email.split("@")[0]); // Extract name from email
-            templateData.put("resetUrl", baseUrl + "/reset-password?token=" + token);
+            templateData.put("resetUrl", properties.getEmail().getBaseUrl() + "/reset-password?token=" + token);
             templateData.put("expiryHours", "24");
 
             SendNotificationRequest request = new SendNotificationRequest(
@@ -116,7 +115,7 @@ public class UserEventConsumer {
     }
 
     @RetryableTopic(attempts = "4", dltTopicSuffix = ".dlq", autoCreateTopics = "true", topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE)
-    @KafkaListener(topics = "${kafka.topics.password-reset-completed:user.password-reset-completed}")
+    @KafkaListener(topics = "#{notificationProperties.kafka.topics['password-reset-completed']}")
     public void handlePasswordResetCompleted(
             @Payload String message,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
@@ -131,7 +130,7 @@ public class UserEventConsumer {
 
             Map<String, Object> templateData = new HashMap<>();
             templateData.put("userName", email.split("@")[0]);
-            templateData.put("dashboardUrl", baseUrl + "/dashboard");
+            templateData.put("dashboardUrl", properties.getEmail().getBaseUrl() + "/dashboard");
 
             SendNotificationRequest request = new SendNotificationRequest(
                     NotificationType.PASSWORD_RESET_CONFIRMATION,

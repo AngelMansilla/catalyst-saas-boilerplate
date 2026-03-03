@@ -56,8 +56,38 @@ spring:
 server:
   port: ${SERVER_PORT:8081}
 
-# Catalyst Security Configuration
+# Catalyst Configuration (Structured to avoid IDE warnings)
 catalyst:
+  payment:
+    stripe:
+      api-key: ${STRIPE_API_KEY:sk_test_your_stripe_secret_key}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_your_webhook_secret}
+      public-key: ${STRIPE_PUBLIC_KEY:pk_test_your_stripe_public_key}
+
+    trial:
+      duration-days: ${TRIAL_DURATION_DAYS:14}
+
+    tiers:
+      professional:
+        monthly-price-id: ${STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID:price_professional_monthly}
+        annual-price-id: ${STRIPE_PROFESSIONAL_ANNUAL_PRICE_ID:price_professional_annual}
+        monthly-amount: 29.00
+        annual-amount: 290.00
+      clinic:
+        monthly-price-id: ${STRIPE_CLINIC_MONTHLY_PRICE_ID:price_clinic_monthly}
+        annual-price-id: ${STRIPE_CLINIC_ANNUAL_PRICE_ID:price_clinic_annual}
+        monthly-amount: 99.00
+        annual-amount: 990.00
+
+    kafka:
+      topics:
+        subscription-created: payment.subscription.created
+        subscription-activated: payment.subscription.activated
+        subscription-canceled: payment.subscription.canceled
+        payment-succeeded: payment.succeeded
+        payment-failed: payment.failed
+        dlq: payment.dlq
+
   security:
     jwt:
       secret: ${JWT_SECRET:your-256-bit-secret-key-for-development-only}
@@ -82,41 +112,6 @@ catalyst:
       encryption-key: ${ENCRYPTION_KEY:32-char-dev-encryption-key-fixed}
       bcrypt-strength: 12
 
-# Payment Service Configuration
-payment:
-  # Stripe Configuration
-  stripe:
-    api-key: ${STRIPE_API_KEY:sk_test_your_stripe_secret_key}
-    webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_your_webhook_secret}
-    public-key: ${STRIPE_PUBLIC_KEY:pk_test_your_stripe_public_key}
-
-  # Trial Configuration
-  trial:
-    duration-days: ${TRIAL_DURATION_DAYS:14}
-
-  # Subscription Tiers Configuration
-  tiers:
-    professional:
-      monthly-price-id: ${STRIPE_PROFESSIONAL_MONTHLY_PRICE_ID:price_professional_monthly}
-      annual-price-id: ${STRIPE_PROFESSIONAL_ANNUAL_PRICE_ID:price_professional_annual}
-      monthly-amount: 29.00
-      annual-amount: 290.00
-    clinic:
-      monthly-price-id: ${STRIPE_CLINIC_MONTHLY_PRICE_ID:price_clinic_monthly}
-      annual-price-id: ${STRIPE_CLINIC_ANNUAL_PRICE_ID:price_clinic_annual}
-      monthly-amount: 99.00
-      annual-amount: 990.00
-
-  # Kafka Topics
-  kafka:
-    topics:
-      subscription-created: payment.subscription.created
-      subscription-activated: payment.subscription.activated
-      subscription-canceled: payment.subscription.canceled
-      payment-succeeded: payment.succeeded
-      payment-failed: payment.failed
-      dlq: payment.dlq
-
 # Logging
 logging:
   level:
@@ -136,7 +131,6 @@ management:
       show-details: when_authorized
       probes:
         enabled: true
-      validate-group-membership: false
       group:
         liveness:
           include: ping

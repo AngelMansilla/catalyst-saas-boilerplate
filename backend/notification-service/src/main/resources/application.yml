@@ -88,23 +88,37 @@ spring:
       enable-auto-commit: false
       properties:
         spring.json.trusted.packages: "*"
-    listener:
-      ack-mode: manual_immediate
+    private-topics: # Moved here to avoid root collisions if needed, but we use catalyst prefix mostly
+      user-registered: user.registered
 
-# Kafka Topics
-kafka:
-  topics:
-    user-registered: user.registered
-    password-reset-requested: user.password-reset-requested
-    password-reset-completed: user.password-reset-completed
-    subscription-created: payment.subscription.created
-    payment-succeeded: payment.succeeded
-    payment-failed: payment.failed
-    subscription-canceled: payment.subscription.canceled
-    trial-expired: payment.trial.expired
-
-# Catalyst Security Configuration
+# Catalyst Configuration (Structured to avoid IDE warnings)
 catalyst:
+  notification:
+    kafka:
+      topics:
+        user-registered: user.registered
+        password-reset-requested: user.password-reset-requested
+        password-reset-completed: user.password-reset-completed
+        subscription-created: payment.subscription.created
+        payment-succeeded: payment.succeeded
+        payment-failed: payment.failed
+        subscription-canceled: payment.subscription.canceled
+        trial-expired: payment.trial.expired
+
+    email:
+      base-url: ${EMAIL_BASE_URL:http://localhost:3000}
+      logo-url: ${EMAIL_LOGO_URL:http://localhost:3000/logo.png}
+      support-email: ${SUPPORT_EMAIL:support@catalyst.com}
+      password-reset:
+        expiration-hours: ${PASSWORD_RESET_EXPIRATION:24}
+
+    aws:
+      ses:
+        region: ${AWS_SES_REGION:us-east-1}
+        enabled: ${AWS_SES_ENABLED:false}
+        access-key-id: ${AWS_ACCESS_KEY_ID:}
+        secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+
   security:
     jwt:
       secret: ${JWT_SECRET:your-256-bit-secret-key-for-jwt-signing-must-be-at-least-32-chars}
@@ -114,22 +128,6 @@ catalyst:
     crypto:
       encryption-key: ${ENCRYPTION_KEY:your-32-char-encryption-key-here}
       bcrypt-strength: 12
-
-# Email Configuration
-email:
-  base-url: ${EMAIL_BASE_URL:http://localhost:3000}
-  logo-url: ${EMAIL_LOGO_URL:http://localhost:3000/logo.png}
-  support-email: ${SUPPORT_EMAIL:support@catalyst.com}
-  password-reset:
-    expiration-hours: ${PASSWORD_RESET_EXPIRATION:24}
-
-# AWS SES Configuration (production)
-aws:
-  ses:
-    region: ${AWS_SES_REGION:us-east-1}
-    enabled: ${AWS_SES_ENABLED:false}
-    access-key-id: ${AWS_ACCESS_KEY_ID:}
-    secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
 
 # Logging
 logging:
@@ -165,7 +163,6 @@ management:
       show-details: when_authorized
       probes:
         enabled: true
-      validate-group-membership: false
       group:
         liveness:
           include: ping
