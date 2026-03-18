@@ -60,9 +60,8 @@ coverage/
 .nyc_output/
 test-results/
 
-# Next.js
-.next/
-out/
+# Angular
+.angular/
 
 # Misc
 *.pem

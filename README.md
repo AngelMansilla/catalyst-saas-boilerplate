@@ -3,8 +3,8 @@
 > Elite reusable boilerplate with robust payment system (Stripe) and authentication - Built to GrayHair Standard
 
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.1-green.svg)](https://spring.io/projects/spring-boot)
-[![Angular](https://img.shields.io/badge/Angular-19-red.svg)](https://angular.dev/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-green.svg)](https://spring.io/projects/spring-boot)
+[![Angular](https://img.shields.io/badge/Angular-21-red.svg)](https://angular.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 
@@ -27,7 +27,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 - 🏗️ **Hexagonal Architecture**: Clean, maintainable, and testable code
 - 📨 **Event-Driven**: Apache Kafka for asynchronous processing (Registration, Payments, Deletion)
 - ⚡ **High Performance**: Java 25 LTS Virtual Threads + Redis caching
-- 🎨 **Modern UI**: Angular 19 + PrimeNG / Tailwind CSS + Signals State Management
+- 🎨 **Modern UI**: Angular 21 + Angular Material + Signals State Management
 - �️ **GDPR Compliant**: Built-in account deletion and data privacy flows
 - 📈 **Observable**: Correlation IDs tracing and structured JSON logging
 - 🧪 **Well Tested**: Comprehensive test coverage with JUnit, Vitest, and Playwright
@@ -36,17 +36,17 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 
 ### Backend
 - **Java 25 LTS** with Virtual Threads (Premier Support until 2030)
-- **Spring Boot 4.0.1** (Framework)
+- **Spring Boot 3.4.1** (Framework)
 - **Maven** (Build tool)
 - **PostgreSQL 16** (Database)
 - **Redis 7** (Caching)
 - **Apache Kafka 3.6** (Message queue)
 
 ### Frontend
-- **Angular 19** (Signals, Standalone Components, Hydration)
+- **Angular 21** (Signals, Standalone Components, Hydration)
 - **TypeScript** (Type safety)
+- **Angular Material** (Component library)
 - **Tailwind CSS** (Styling)
-- **PrimeNG** (Optional Component System)
 - **OIDC / JWT** (Authentication)
 
 ### Infrastructure
@@ -57,7 +57,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 ### Testing
 - **JUnit 5** (Backend unit tests)
 - **Testcontainers** (Integration tests)
-- **Vitest** (Frontend unit tests)
+- **Karma / Jest** (Frontend unit tests)
 - **Playwright** (E2E tests)
 
 ## 🚀 Quick Start
@@ -65,7 +65,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 1. **Clone & Setup**:
    ```bash
    git clone <repository-url>
-   cd catalyst-pay
+   cd Catalys
    ```
 
 2. **Launch Infrastructure**:
@@ -77,7 +77,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 ## 📁 Project Structure
 
 ```
-catalyst-pay/
+Catalys/
 ├── backend/                    # Java backend (Maven multi-module)
 │   ├── shared-kernel/         # Observability, Security, Correlation Tracing
 │   ├── user-service/          # Identity and Profile management
@@ -86,10 +86,10 @@ catalyst-pay/
 │       ├── domain/            # Business logic (framework-agnostic)
 │       ├── application/       # Use cases and ports
 │       └── infrastructure/    # Adapters (Spring, DB, Stripe, Kafka)
-├── frontend/                   # Angular frontend (Standalone)
+├── frontend/                   # Angular 21 frontend (Planned)
 │   ├── src/app/core/          # Global services, guards, interceptors
-│   ├── src/app/features/      # Domain-specific modules (Lazy loaded)
-│   └── src/app/shared/        # Reusable components and pipes
+│   ├── src/app/features/      # Feature modules (Lazy loaded)
+│   └── src/app/shared/        # Reusable components, directives, pipes
 ├── infra/                      # Infrastructure configuration
 │   ├── docker-compose.yml     # All services
 │   ├── postgres/              # Database init scripts
@@ -114,15 +114,16 @@ catalyst-pay/
 └─────────────────────────────────────────┘
 ```
 
-### Feature-Based Organization (Frontend)
+### Feature-Based Organization (Frontend — Planned)
 
 ```
 features/
 └── payment/
-    ├── components/    # UI components
-    ├── hooks/         # Custom React hooks
-    ├── services/      # API calls
-    └── types/         # TypeScript types
+    ├── components/    # Angular components
+    ├── services/      # API call services
+    ├── models/        # TypeScript types/interfaces
+    ├── guards/        # Route guards
+    └── pipes/         # Custom pipes
 ```
 
 ## 🗄️ Database Schema
@@ -148,16 +149,16 @@ cd backend
 mvn test
 ```
 
-### Frontend Tests
+### Frontend Tests (Planned)
 ```bash
 cd frontend
-npm run test
+ng test
 ```
 
-### E2E Tests
+### E2E Tests (Planned)
 ```bash
 cd frontend
-npm run test:e2e
+ng e2e
 ```
 
 ## 📄 License
