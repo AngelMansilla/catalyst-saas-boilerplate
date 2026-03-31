@@ -2,6 +2,7 @@
 
 > Elite reusable boilerplate with robust payment system (Stripe) and authentication - Built to GrayHair Standard
 
+[![CI](https://github.com/AngelMansilla/Catalyst-Saas-Boilerplate/actions/workflows/ci.yml/badge.svg)](https://github.com/AngelMansilla/Catalyst-Saas-Boilerplate/actions/workflows/ci.yml)
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-green.svg)](https://spring.io/projects/spring-boot)
 [![Angular](https://img.shields.io/badge/Angular-21-red.svg)](https://angular.dev/)

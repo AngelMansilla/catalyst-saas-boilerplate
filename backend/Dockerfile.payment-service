@@ -1,0 +1,40 @@
+# ── Stage 1: Build ────────────────────────────────────────────────────────────
+FROM maven:3.9-eclipse-temurin-25 AS builder
+
+WORKDIR /app
+
+COPY pom.xml ./
+COPY shared-kernel/pom.xml shared-kernel/
+COPY user-service/pom.xml user-service/
+COPY payment-service/pom.xml payment-service/
+COPY notification-service/pom.xml notification-service/
+
+RUN mvn dependency:go-offline -pl shared-kernel,payment-service -am \
+    --batch-mode --no-transfer-progress -q
+
+COPY shared-kernel/src shared-kernel/src
+COPY payment-service/src payment-service/src
+
+RUN mvn package -pl shared-kernel,payment-service -am \
+    --batch-mode --no-transfer-progress -DskipTests
+
+# ── Stage 2: Runtime ──────────────────────────────────────────────────────────
+FROM eclipse-temurin:25-jre-alpine
+
+RUN addgroup -S catalyst && adduser -S catalyst -G catalyst
+
+WORKDIR /app
+
+COPY --from=builder /app/payment-service/target/*.jar app.jar
+
+RUN chown catalyst:catalyst app.jar
+
+USER catalyst
+
+EXPOSE 8082
+
+ENTRYPOINT ["java", \
+  "-XX:+UseVirtualThreads", \
+  "-XX:+UseContainerSupport", \
+  "-XX:MaxRAMPercentage=75.0", \
+  "-jar", "app.jar"]

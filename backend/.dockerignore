@@ -1,0 +1,30 @@
+# Build artifacts
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+
+# IDE
+**/.idea/
+**/.vscode/
+**/.settings/
+**/.classpath
+**/.project
+**/.factorypath
+
+# Tests
+**/src/test/
+
+# Git
+**/.git/
+**/.gitignore
+
+# Docs
+**/README.md
+**/AGENTS.md
+
+# Local config
+**/application-local.yml
+**/application-local.yaml
+**/.env
+**/*.env
