@@ -25,8 +25,8 @@ class SubscriptionTest {
     class FactoryMethods {
 
         @Test
-        @DisplayName("startTrial creates subscription in TRIAL status")
-        void startTrialCreatesSubscriptionInTrialStatus() {
+        @DisplayName("startTrial_whenValidInput_thenCreatesSubscriptionInTrialStatus")
+        void startTrial_whenValidInput_thenCreatesSubscriptionInTrialStatus() {
             Subscription subscription = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
 
             assertThat(subscription.getId()).isNotNull();
@@ -38,24 +38,24 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("startTrial throws exception for null customerId")
-        void startTrialThrowsForNullCustomerId() {
+        @DisplayName("startTrial_whenNullCustomerId_thenThrowsIllegalArgument")
+        void startTrial_whenNullCustomerId_thenThrowsIllegalArgument() {
             assertThatThrownBy(() -> Subscription.startTrial(null, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Customer ID");
         }
 
         @Test
-        @DisplayName("startTrial throws exception for null tier")
-        void startTrialThrowsForNullTier() {
+        @DisplayName("startTrial_whenNullTier_thenThrowsIllegalArgument")
+        void startTrial_whenNullTier_thenThrowsIllegalArgument() {
             assertThatThrownBy(() -> Subscription.startTrial(CUSTOMER_ID, null, TRIAL_DAYS))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("tier");
         }
 
         @Test
-        @DisplayName("startTrial throws exception for non-positive trial days")
-        void startTrialThrowsForNonPositiveTrialDays() {
+        @DisplayName("startTrial_whenNonPositiveTrialDays_thenThrowsIllegalArgument")
+        void startTrial_whenNonPositiveTrialDays_thenThrowsIllegalArgument() {
             assertThatThrownBy(() -> Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Trial days");
@@ -67,8 +67,8 @@ class SubscriptionTest {
     class StateTransitions {
 
         @Test
-        @DisplayName("TRIAL -> ACTIVE via activate()")
-        void trialToActiveTransition() {
+        @DisplayName("activate_whenTrialSubscription_thenTransitionsToActive")
+        void activate_whenTrialSubscription_thenTransitionsToActive() {
             Subscription subscription = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
             StripeSubscriptionId stripeId = StripeSubscriptionId.of("sub_123456");
 
@@ -84,8 +84,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("TRIAL -> CANCELED via cancel()")
-        void trialToCanceledTransition() {
+        @DisplayName("cancel_whenTrialSubscription_thenTransitionsToCanceled")
+        void cancel_whenTrialSubscription_thenTransitionsToCanceled() {
             Subscription subscription = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
 
             subscription.cancel(CancellationReason.USER_REQUESTED, true);
@@ -97,8 +97,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("TRIAL -> EXPIRED via expireTrial()")
-        void trialToExpiredTransition() {
+        @DisplayName("expireTrial_whenTrialSubscription_thenTransitionsToExpired")
+        void expireTrial_whenTrialSubscription_thenTransitionsToExpired() {
             Subscription subscription = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
             // Manually set trial end to past
             subscription.setTrialEndDate(LocalDateTime.now().minusDays(1));
@@ -109,8 +109,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("ACTIVE -> PAST_DUE via markPastDue()")
-        void activeToPastDueTransition() {
+        @DisplayName("markPastDue_whenActiveSubscription_thenTransitionsToPastDue")
+        void markPastDue_whenActiveSubscription_thenTransitionsToPastDue() {
             Subscription subscription = createActiveSubscription();
 
             subscription.markPastDue();
@@ -120,8 +120,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("ACTIVE -> CANCELED via cancel()")
-        void activeToCanceledTransition() {
+        @DisplayName("cancel_whenActiveSubscription_thenTransitionsToCanceled")
+        void cancel_whenActiveSubscription_thenTransitionsToCanceled() {
             Subscription subscription = createActiveSubscription();
 
             subscription.cancel(CancellationReason.USER_REQUESTED, false);
@@ -130,8 +130,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("PAST_DUE -> ACTIVE via recordPaymentSuccess()")
-        void pastDueToActiveTransition() {
+        @DisplayName("recordPaymentSuccess_whenPastDueSubscription_thenTransitionsToActive")
+        void recordPaymentSuccess_whenPastDueSubscription_thenTransitionsToActive() {
             Subscription subscription = createActiveSubscription();
             subscription.markPastDue();
 
@@ -141,8 +141,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("PAST_DUE -> CANCELED via cancel()")
-        void pastDueToCanceledTransition() {
+        @DisplayName("cancel_whenPastDueSubscription_thenTransitionsToCanceled")
+        void cancel_whenPastDueSubscription_thenTransitionsToCanceled() {
             Subscription subscription = createActiveSubscription();
             subscription.markPastDue();
 
@@ -157,8 +157,8 @@ class SubscriptionTest {
     class InvalidStateTransitions {
 
         @Test
-        @DisplayName("TRIAL cannot transition to PAST_DUE")
-        void trialCannotTransitionToPastDue() {
+        @DisplayName("markPastDue_whenTrialSubscription_thenThrowsInvalidSubscriptionState")
+        void markPastDue_whenTrialSubscription_thenThrowsInvalidSubscriptionState() {
             Subscription subscription = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
 
             assertThatThrownBy(subscription::markPastDue)
@@ -168,8 +168,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("CANCELED can be reactivated via activate() for subscription reactivation")
-        void canceledCanBeReactivated() {
+        @DisplayName("activate_whenCanceledSubscription_thenReactivatesToActive")
+        void activate_whenCanceledSubscription_thenReactivatesToActive() {
             Subscription subscription = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
             subscription.cancel(CancellationReason.USER_REQUESTED, true);
 
@@ -181,8 +181,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("EXPIRED subscription expireTrial fails")
-        void expiredSubscriptionExpireTrialFails() {
+        @DisplayName("expireTrial_whenAlreadyExpired_thenThrowsInvalidSubscriptionState")
+        void expireTrial_whenAlreadyExpired_thenThrowsInvalidSubscriptionState() {
             Subscription subscription = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
             subscription.setTrialEndDate(LocalDateTime.now().minusDays(1));
             subscription.expireTrial();
@@ -198,8 +198,8 @@ class SubscriptionTest {
     class BusinessLogic {
 
         @Test
-        @DisplayName("isInTrial returns true only during valid trial period")
-        void isInTrialReturnsCorrectly() {
+        @DisplayName("isInTrial_whenTrialNotExpired_thenReturnsTrueOtherwiseFalse")
+        void isInTrial_whenTrialNotExpired_thenReturnsTrueOtherwiseFalse() {
             Subscription subscription = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
             
             assertThat(subscription.isInTrial()).isTrue();
@@ -210,8 +210,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("canReactivate returns true for CANCELED and EXPIRED")
-        void canReactivateReturnsCorrectly() {
+        @DisplayName("canReactivate_whenCanceledOrExpired_thenReturnsTrueOtherwiseFalse")
+        void canReactivate_whenCanceledOrExpired_thenReturnsTrueOtherwiseFalse() {
             Subscription canceledSub = Subscription.startTrial(CUSTOMER_ID, SubscriptionTier.PROFESSIONAL, TRIAL_DAYS);
             canceledSub.cancel(CancellationReason.USER_REQUESTED, true);
             assertThat(canceledSub.canReactivate()).isTrue();
@@ -226,8 +226,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("updatePeriod validates dates")
-        void updatePeriodValidatesDates() {
+        @DisplayName("updatePeriod_whenValidDates_thenUpdatesPeriodStartAndEnd")
+        void updatePeriod_whenValidDates_thenUpdatesPeriodStartAndEnd() {
             Subscription subscription = createActiveSubscription();
             LocalDateTime start = LocalDateTime.now();
             LocalDateTime end = start.plusMonths(1);
@@ -239,8 +239,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("updatePeriod throws for null dates")
-        void updatePeriodThrowsForNullDates() {
+        @DisplayName("updatePeriod_whenNullDates_thenThrowsIllegalArgument")
+        void updatePeriod_whenNullDates_thenThrowsIllegalArgument() {
             Subscription subscription = createActiveSubscription();
 
             assertThatThrownBy(() -> subscription.updatePeriod(null, LocalDateTime.now()))
@@ -251,8 +251,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("updatePeriod throws when start is after end")
-        void updatePeriodThrowsWhenStartAfterEnd() {
+        @DisplayName("updatePeriod_whenStartAfterEnd_thenThrowsIllegalArgument")
+        void updatePeriod_whenStartAfterEnd_thenThrowsIllegalArgument() {
             Subscription subscription = createActiveSubscription();
             LocalDateTime start = LocalDateTime.now().plusMonths(1);
             LocalDateTime end = LocalDateTime.now();
@@ -268,8 +268,8 @@ class SubscriptionTest {
     class SubscriptionStatusTests {
 
         @Test
-        @DisplayName("TRIAL allows transition to ACTIVE, CANCELED, EXPIRED")
-        void trialAllowedTransitions() {
+        @DisplayName("canTransitionTo_whenTrialStatus_thenAllowsActiveAndCanceledAndExpiredOnly")
+        void canTransitionTo_whenTrialStatus_thenAllowsActiveAndCanceledAndExpiredOnly() {
             assertThat(SubscriptionStatus.TRIAL.canTransitionTo(SubscriptionStatus.ACTIVE)).isTrue();
             assertThat(SubscriptionStatus.TRIAL.canTransitionTo(SubscriptionStatus.CANCELED)).isTrue();
             assertThat(SubscriptionStatus.TRIAL.canTransitionTo(SubscriptionStatus.EXPIRED)).isTrue();
@@ -277,8 +277,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("ACTIVE allows transition to PAST_DUE, CANCELED")
-        void activeAllowedTransitions() {
+        @DisplayName("canTransitionTo_whenActiveStatus_thenAllowsPastDueAndCanceledOnly")
+        void canTransitionTo_whenActiveStatus_thenAllowsPastDueAndCanceledOnly() {
             assertThat(SubscriptionStatus.ACTIVE.canTransitionTo(SubscriptionStatus.PAST_DUE)).isTrue();
             assertThat(SubscriptionStatus.ACTIVE.canTransitionTo(SubscriptionStatus.CANCELED)).isTrue();
             assertThat(SubscriptionStatus.ACTIVE.canTransitionTo(SubscriptionStatus.TRIAL)).isFalse();
@@ -286,8 +286,8 @@ class SubscriptionTest {
         }
 
         @Test
-        @DisplayName("PAST_DUE allows transition to ACTIVE, CANCELED")
-        void pastDueAllowedTransitions() {
+        @DisplayName("canTransitionTo_whenPastDueStatus_thenAllowsActiveAndCanceledOnly")
+        void canTransitionTo_whenPastDueStatus_thenAllowsActiveAndCanceledOnly() {
             assertThat(SubscriptionStatus.PAST_DUE.canTransitionTo(SubscriptionStatus.ACTIVE)).isTrue();
             assertThat(SubscriptionStatus.PAST_DUE.canTransitionTo(SubscriptionStatus.CANCELED)).isTrue();
             assertThat(SubscriptionStatus.PAST_DUE.canTransitionTo(SubscriptionStatus.TRIAL)).isFalse();

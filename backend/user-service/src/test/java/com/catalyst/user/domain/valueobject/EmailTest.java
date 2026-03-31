@@ -6,23 +6,24 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for Email value object.
- * 
+ *
  * @author Catalyst Team
  * @since 0.1.0
  */
 @DisplayName("Email Value Object")
 class EmailTest {
-    
+
     @Nested
     @DisplayName("Valid Emails")
     class ValidEmails {
-        
+
         @ParameterizedTest
-        @DisplayName("Should accept valid email formats")
+        @DisplayName("of_whenValidFormat_thenCreatesEmail")
         @ValueSource(strings = {
             "simple@example.com",
             "very.common@example.com",
@@ -32,42 +33,36 @@ class EmailTest {
             "user@example.co.uk",
             "test123@test.org"
         })
-        void shouldAcceptValidEmailFormats(String email) {
-            // When
+        void of_whenValidFormat_thenCreatesEmail(String email) {
             Email result = Email.of(email);
-            
-            // Then
-            assertNotNull(result);
-            assertEquals(email.toLowerCase(), result.getValue());
+
+            assertThat(result).isNotNull();
+            assertThat(result.getValue()).isEqualTo(email.toLowerCase());
         }
-        
+
         @Test
-        @DisplayName("Should normalize email to lowercase")
-        void shouldNormalizeEmailToLowercase() {
-            // When
+        @DisplayName("of_whenUppercaseEmail_thenNormalizesToLowercase")
+        void of_whenUppercaseEmail_thenNormalizesToLowercase() {
             Email result = Email.of("TEST@EXAMPLE.COM");
-            
-            // Then
-            assertEquals("test@example.com", result.getValue());
+
+            assertThat(result.getValue()).isEqualTo("test@example.com");
         }
-        
+
         @Test
-        @DisplayName("Should trim whitespace")
-        void shouldTrimWhitespace() {
-            // When
+        @DisplayName("of_whenEmailWithWhitespace_thenTrimsAndCreates")
+        void of_whenEmailWithWhitespace_thenTrimsAndCreates() {
             Email result = Email.of("  test@example.com  ");
-            
-            // Then
-            assertEquals("test@example.com", result.getValue());
+
+            assertThat(result.getValue()).isEqualTo("test@example.com");
         }
     }
-    
+
     @Nested
     @DisplayName("Invalid Emails")
     class InvalidEmails {
-        
+
         @ParameterizedTest
-        @DisplayName("Should reject invalid email formats")
+        @DisplayName("of_whenInvalidFormat_thenThrowsIllegalArgument")
         @ValueSource(strings = {
             "plainaddress",
             "@missing-local.com",
@@ -77,86 +72,77 @@ class EmailTest {
             "two@@at.com",
             "spaces in@email.com"
         })
-        void shouldRejectInvalidEmailFormats(String email) {
-            // When/Then
-            assertThrows(IllegalArgumentException.class, () -> Email.of(email));
+        void of_whenInvalidFormat_thenThrowsIllegalArgument(String email) {
+            assertThatThrownBy(() -> Email.of(email))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
-        
+
         @Test
-        @DisplayName("Should reject null email")
-        void shouldRejectNullEmail() {
-            assertThrows(IllegalArgumentException.class, () -> Email.of(null));
+        @DisplayName("of_whenNull_thenThrowsIllegalArgument")
+        void of_whenNull_thenThrowsIllegalArgument() {
+            assertThatThrownBy(() -> Email.of(null))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
-        
+
         @Test
-        @DisplayName("Should reject blank email")
-        void shouldRejectBlankEmail() {
-            assertThrows(IllegalArgumentException.class, () -> Email.of("   "));
+        @DisplayName("of_whenBlank_thenThrowsIllegalArgument")
+        void of_whenBlank_thenThrowsIllegalArgument() {
+            assertThatThrownBy(() -> Email.of("   "))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
     }
-    
+
     @Nested
     @DisplayName("Email Parts")
     class EmailParts {
-        
+
         @Test
-        @DisplayName("Should extract domain")
-        void shouldExtractDomain() {
-            // Given
+        @DisplayName("getDomain_whenValidEmail_thenReturnsDomainPart")
+        void getDomain_whenValidEmail_thenReturnsDomainPart() {
             Email email = Email.of("user@example.com");
-            
-            // Then
-            assertEquals("example.com", email.getDomain());
+
+            assertThat(email.getDomain()).isEqualTo("example.com");
         }
-        
+
         @Test
-        @DisplayName("Should extract local part")
-        void shouldExtractLocalPart() {
-            // Given
+        @DisplayName("getLocalPart_whenValidEmail_thenReturnsLocalPart")
+        void getLocalPart_whenValidEmail_thenReturnsLocalPart() {
             Email email = Email.of("user.name@example.com");
-            
-            // Then
-            assertEquals("user.name", email.getLocalPart());
+
+            assertThat(email.getLocalPart()).isEqualTo("user.name");
         }
     }
-    
+
     @Nested
     @DisplayName("Equality")
     class Equality {
-        
+
         @Test
-        @DisplayName("Same emails should be equal")
-        void sameEmailsShouldBeEqual() {
-            // Given
+        @DisplayName("equals_whenSameEmail_thenReturnsTrue")
+        void equals_whenSameEmail_thenReturnsTrue() {
             Email email1 = Email.of("test@example.com");
             Email email2 = Email.of("test@example.com");
-            
-            // Then
-            assertEquals(email1, email2);
-            assertEquals(email1.hashCode(), email2.hashCode());
+
+            assertThat(email1).isEqualTo(email2);
+            assertThat(email1.hashCode()).isEqualTo(email2.hashCode());
         }
-        
+
         @Test
-        @DisplayName("Different emails should not be equal")
-        void differentEmailsShouldNotBeEqual() {
-            // Given
+        @DisplayName("equals_whenDifferentEmails_thenReturnsFalse")
+        void equals_whenDifferentEmails_thenReturnsFalse() {
             Email email1 = Email.of("test1@example.com");
             Email email2 = Email.of("test2@example.com");
-            
-            // Then
-            assertNotEquals(email1, email2);
+
+            assertThat(email1).isNotEqualTo(email2);
         }
-        
+
         @Test
-        @DisplayName("Case-different emails should be equal after normalization")
-        void caseDifferentEmailsShouldBeEqual() {
-            // Given
+        @DisplayName("equals_whenSameEmailDifferentCase_thenReturnsTrueAfterNormalization")
+        void equals_whenSameEmailDifferentCase_thenReturnsTrueAfterNormalization() {
             Email email1 = Email.of("TEST@EXAMPLE.COM");
             Email email2 = Email.of("test@example.com");
-            
-            // Then
-            assertEquals(email1, email2);
+
+            assertThat(email1).isEqualTo(email2);
         }
     }
 }
-

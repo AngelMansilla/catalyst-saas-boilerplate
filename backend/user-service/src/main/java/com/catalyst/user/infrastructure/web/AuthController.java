@@ -1,5 +1,8 @@
 package com.catalyst.user.infrastructure.web;
 
+import com.catalyst.shared.domain.auth.LoginResponse;
+import com.catalyst.shared.domain.auth.RefreshTokenRequest;
+import com.catalyst.shared.domain.auth.TokenResponse;
 import com.catalyst.user.application.dto.*;
 import com.catalyst.user.application.ports.input.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,16 +35,25 @@ public class AuthController {
     private final ValidateCredentialsUseCase validateCredentialsUseCase;
     private final RequestPasswordResetUseCase requestPasswordResetUseCase;
     private final ResetPasswordUseCase resetPasswordUseCase;
+    private final LoginUseCase loginUseCase;
+    private final RefreshTokenUseCase refreshTokenUseCase;
+    private final LogoutUseCase logoutUseCase;
 
     public AuthController(
             RegisterUserUseCase registerUserUseCase,
             ValidateCredentialsUseCase validateCredentialsUseCase,
             RequestPasswordResetUseCase requestPasswordResetUseCase,
-            ResetPasswordUseCase resetPasswordUseCase) {
+            ResetPasswordUseCase resetPasswordUseCase,
+            LoginUseCase loginUseCase,
+            RefreshTokenUseCase refreshTokenUseCase,
+            LogoutUseCase logoutUseCase) {
         this.registerUserUseCase = registerUserUseCase;
         this.validateCredentialsUseCase = validateCredentialsUseCase;
         this.requestPasswordResetUseCase = requestPasswordResetUseCase;
         this.resetPasswordUseCase = resetPasswordUseCase;
+        this.loginUseCase = loginUseCase;
+        this.refreshTokenUseCase = refreshTokenUseCase;
+        this.logoutUseCase = logoutUseCase;
     }
 
     @PostMapping("/register")
@@ -85,6 +97,35 @@ public class AuthController {
         resetPasswordUseCase.resetPassword(request);
         return ResponseEntity.ok(Map.of(
                 "message", "Password has been reset successfully"));
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Login", description = "Authenticates user with email and password, returns a JWT token pair")
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody com.catalyst.shared.domain.auth.LoginRequest request,
+            HttpServletRequest httpRequest) {
+        log.info("Login request for email: {}", request.email());
+        String ipAddress = getClientIpAddress(httpRequest);
+        LoginResponse response = loginUseCase.login(request, ipAddress);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh tokens", description = "Issues a new token pair using a valid refresh token")
+    public ResponseEntity<TokenResponse> refresh(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        log.debug("Token refresh request");
+        TokenResponse response = refreshTokenUseCase.refresh(request.refreshToken());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "Logout", description = "Invalidates the refresh token server-side")
+    public ResponseEntity<Void> logout(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        log.info("Logout request");
+        logoutUseCase.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 
     private String getClientIpAddress(HttpServletRequest request) {

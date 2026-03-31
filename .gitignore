@@ -11,6 +11,10 @@
 # IDE
 .vscode/
 .idea/
+.classpath
+.project
+.factorypath
+.settings/
 *.swp
 *.swo
 *~
@@ -68,3 +72,5 @@ test-results/
 *.key
 *.cert
 
+.atl/
+tasks/

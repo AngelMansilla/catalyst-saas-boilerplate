@@ -1,7 +1,0 @@
-# Backlog
-
-## Product
-
-## Technical
-
-## Business

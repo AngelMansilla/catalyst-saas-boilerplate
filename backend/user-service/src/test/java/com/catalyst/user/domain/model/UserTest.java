@@ -13,356 +13,304 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for User aggregate root.
- * 
+ *
  * @author Catalyst Team
  * @since 0.1.0
  */
 @DisplayName("User Aggregate")
 class UserTest {
-    
+
     private static final String VALID_EMAIL = "test@example.com";
     private static final String VALID_NAME = "John Doe";
     private static final String VALID_PASSWORD_HASH = "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.W7j7W3L4X8OM2e";
-    
+
     @Nested
     @DisplayName("Factory Methods")
     class FactoryMethods {
-        
+
         @Test
-        @DisplayName("Should create user with local credentials")
-        void shouldCreateUserWithLocalCredentials() {
-            // Given
+        @DisplayName("registerWithCredentials_whenValidInput_thenCreatesLocalUser")
+        void registerWithCredentials_whenValidInput_thenCreatesLocalUser() {
             Email email = Email.of(VALID_EMAIL);
             HashedPassword password = HashedPassword.fromHash(VALID_PASSWORD_HASH);
-            
-            // When
+
             User user = User.registerWithCredentials(email, VALID_NAME, password);
-            
-            // Then
-            assertNotNull(user.getId());
-            assertEquals(email, user.getEmail());
-            assertEquals(VALID_NAME, user.getName());
-            assertEquals(password, user.getPasswordHash());
-            assertEquals(AuthProvider.LOCAL, user.getProvider());
-            assertNull(user.getProviderAccountId());
-            assertEquals(UserRole.USER, user.getRole());
-            assertFalse(user.isEmailVerified());
-            assertTrue(user.isActive());
-            assertNotNull(user.getCreatedAt());
+
+            assertThat(user.getId()).isNotNull();
+            assertThat(user.getEmail()).isEqualTo(email);
+            assertThat(user.getName()).isEqualTo(VALID_NAME);
+            assertThat(user.getPasswordHash()).isEqualTo(password);
+            assertThat(user.getProvider()).isEqualTo(AuthProvider.LOCAL);
+            assertThat(user.getProviderAccountId()).isNull();
+            assertThat(user.getRole()).isEqualTo(UserRole.USER);
+            assertThat(user.isEmailVerified()).isFalse();
+            assertThat(user.isActive()).isTrue();
+            assertThat(user.getCreatedAt()).isNotNull();
         }
-        
+
         @Test
-        @DisplayName("Should emit UserRegistered event on local registration")
-        void shouldEmitUserRegisteredEventOnLocalRegistration() {
-            // Given
+        @DisplayName("registerWithCredentials_whenValidInput_thenEmitsUserRegisteredEvent")
+        void registerWithCredentials_whenValidInput_thenEmitsUserRegisteredEvent() {
             Email email = Email.of(VALID_EMAIL);
             HashedPassword password = HashedPassword.fromHash(VALID_PASSWORD_HASH);
-            
-            // When
+
             User user = User.registerWithCredentials(email, VALID_NAME, password);
-            
-            // Then
-            var events = user.getDomainEvents();
-            assertEquals(1, events.size());
-            assertInstanceOf(UserRegistered.class, events.get(0));
-            
-            UserRegistered event = (UserRegistered) events.get(0);
-            assertEquals(user.getId(), event.userId());
-            assertEquals(email, event.email());
-            assertEquals(AuthProvider.LOCAL, event.provider());
+
+            assertThat(user.getDomainEvents()).hasSize(1);
+            assertThat(user.getDomainEvents().get(0)).isInstanceOf(UserRegistered.class);
+
+            UserRegistered event = (UserRegistered) user.getDomainEvents().get(0);
+            assertThat(event.userId()).isEqualTo(user.getId());
+            assertThat(event.email()).isEqualTo(email);
+            assertThat(event.provider()).isEqualTo(AuthProvider.LOCAL);
         }
-        
+
         @Test
-        @DisplayName("Should create user with OAuth provider")
-        void shouldCreateUserWithOAuthProvider() {
-            // Given
+        @DisplayName("registerWithOAuth_whenValidInput_thenCreatesOAuthUser")
+        void registerWithOAuth_whenValidInput_thenCreatesOAuthUser() {
             Email email = Email.of(VALID_EMAIL);
             String imageUrl = "https://example.com/avatar.jpg";
             String providerAccountId = "google-12345";
-            
-            // When
-            User user = User.registerWithOAuth(
-                email, VALID_NAME, imageUrl, AuthProvider.GOOGLE, providerAccountId
-            );
-            
-            // Then
-            assertNotNull(user.getId());
-            assertEquals(email, user.getEmail());
-            assertEquals(VALID_NAME, user.getName());
-            assertEquals(imageUrl, user.getImageUrl());
-            assertNull(user.getPasswordHash()); // OAuth users have no password
-            assertEquals(AuthProvider.GOOGLE, user.getProvider());
-            assertEquals(providerAccountId, user.getProviderAccountId());
-            assertTrue(user.isEmailVerified()); // OAuth verifies email
+
+            User user = User.registerWithOAuth(email, VALID_NAME, imageUrl, AuthProvider.GOOGLE, providerAccountId);
+
+            assertThat(user.getId()).isNotNull();
+            assertThat(user.getEmail()).isEqualTo(email);
+            assertThat(user.getName()).isEqualTo(VALID_NAME);
+            assertThat(user.getImageUrl()).isEqualTo(imageUrl);
+            assertThat(user.getPasswordHash()).isNull();
+            assertThat(user.getProvider()).isEqualTo(AuthProvider.GOOGLE);
+            assertThat(user.getProviderAccountId()).isEqualTo(providerAccountId);
+            assertThat(user.isEmailVerified()).isTrue();
         }
-        
+
         @Test
-        @DisplayName("Should reject LOCAL provider for OAuth registration")
-        void shouldRejectLocalProviderForOAuthRegistration() {
-            // Given
+        @DisplayName("registerWithOAuth_whenLocalProvider_thenThrowsIllegalArgument")
+        void registerWithOAuth_whenLocalProvider_thenThrowsIllegalArgument() {
             Email email = Email.of(VALID_EMAIL);
-            
-            // When/Then
-            assertThrows(IllegalArgumentException.class, () ->
-                User.registerWithOAuth(email, VALID_NAME, null, AuthProvider.LOCAL, "123")
-            );
+
+            assertThatThrownBy(() -> User.registerWithOAuth(email, VALID_NAME, null, AuthProvider.LOCAL, "123"))
+                    .isInstanceOf(IllegalArgumentException.class);
         }
-        
+
         @Test
-        @DisplayName("Should require email for registration")
-        void shouldRequireEmailForRegistration() {
-            // Given
+        @DisplayName("registerWithCredentials_whenNullEmail_thenThrowsNullPointer")
+        void registerWithCredentials_whenNullEmail_thenThrowsNullPointer() {
             HashedPassword password = HashedPassword.fromHash(VALID_PASSWORD_HASH);
-            
-            // When/Then
-            assertThrows(NullPointerException.class, () ->
-                User.registerWithCredentials(null, VALID_NAME, password)
-            );
+
+            assertThatThrownBy(() -> User.registerWithCredentials(null, VALID_NAME, password))
+                    .isInstanceOf(NullPointerException.class);
         }
-        
+
         @Test
-        @DisplayName("Should require password for local registration")
-        void shouldRequirePasswordForLocalRegistration() {
-            // Given
+        @DisplayName("registerWithCredentials_whenNullPassword_thenThrowsNullPointer")
+        void registerWithCredentials_whenNullPassword_thenThrowsNullPointer() {
             Email email = Email.of(VALID_EMAIL);
-            
-            // When/Then
-            assertThrows(NullPointerException.class, () ->
-                User.registerWithCredentials(email, VALID_NAME, null)
-            );
+
+            assertThatThrownBy(() -> User.registerWithCredentials(email, VALID_NAME, null))
+                    .isInstanceOf(NullPointerException.class);
         }
     }
-    
+
     @Nested
     @DisplayName("Domain Operations")
     class DomainOperations {
-        
+
         @Test
-        @DisplayName("Should record login and emit event")
-        void shouldRecordLoginAndEmitEvent() {
-            // Given
+        @DisplayName("recordLogin_whenActiveUser_thenUpdatesLastLoginAndEmitsEvent")
+        void recordLogin_whenActiveUser_thenUpdatesLastLoginAndEmitsEvent() {
             User user = createLocalUser();
-            user.clearDomainEvents(); // Clear registration event
+            user.clearDomainEvents();
             String ipAddress = "192.168.1.1";
-            
-            // When
+
             user.recordLogin(ipAddress);
-            
-            // Then
-            assertNotNull(user.getLastLoginAt());
-            
-            var events = user.getDomainEvents();
-            assertEquals(1, events.size());
-            assertInstanceOf(UserLoggedIn.class, events.get(0));
-            
-            UserLoggedIn event = (UserLoggedIn) events.get(0);
-            assertEquals(ipAddress, event.ipAddress());
+
+            assertThat(user.getLastLoginAt()).isNotNull();
+            assertThat(user.getDomainEvents()).hasSize(1);
+            assertThat(user.getDomainEvents().get(0)).isInstanceOf(UserLoggedIn.class);
+
+            UserLoggedIn event = (UserLoggedIn) user.getDomainEvents().get(0);
+            assertThat(event.ipAddress()).isEqualTo(ipAddress);
         }
-        
+
         @Test
-        @DisplayName("Should not allow login for inactive user")
-        void shouldNotAllowLoginForInactiveUser() {
-            // Given
+        @DisplayName("recordLogin_whenInactiveUser_thenThrowsIllegalState")
+        void recordLogin_whenInactiveUser_thenThrowsIllegalState() {
             User user = createLocalUser();
             user.deactivate();
-            
-            // When/Then
-            assertThrows(IllegalStateException.class, () -> user.recordLogin("192.168.1.1"));
+
+            assertThatThrownBy(() -> user.recordLogin("192.168.1.1"))
+                    .isInstanceOf(IllegalStateException.class);
         }
-        
+
         @Test
-        @DisplayName("Should update profile")
-        void shouldUpdateProfile() {
-            // Given
+        @DisplayName("updateProfile_whenValidInput_thenUpdatesNameAndImage")
+        void updateProfile_whenValidInput_thenUpdatesNameAndImage() {
             User user = createLocalUser();
             String newName = "Jane Doe";
             String newImageUrl = "https://example.com/new-avatar.jpg";
-            
-            // When
+
             user.updateProfile(newName, newImageUrl);
-            
-            // Then
-            assertEquals(newName, user.getName());
-            assertEquals(newImageUrl, user.getImageUrl());
+
+            assertThat(user.getName()).isEqualTo(newName);
+            assertThat(user.getImageUrl()).isEqualTo(newImageUrl);
         }
-        
+
         @Test
-        @DisplayName("Should sync from OAuth")
-        void shouldSyncFromOAuth() {
-            // Given
+        @DisplayName("syncFromOAuth_whenOAuthUser_thenUpdatesProfileAndLastLogin")
+        void syncFromOAuth_whenOAuthUser_thenUpdatesProfileAndLastLogin() {
             User user = createOAuthUser();
             String newName = "Updated Name";
             String newImageUrl = "https://example.com/updated.jpg";
-            
-            // When
+
             user.syncFromOAuth(newName, newImageUrl);
-            
-            // Then
-            assertEquals(newName, user.getName());
-            assertEquals(newImageUrl, user.getImageUrl());
-            assertNotNull(user.getLastLoginAt());
+
+            assertThat(user.getName()).isEqualTo(newName);
+            assertThat(user.getImageUrl()).isEqualTo(newImageUrl);
+            assertThat(user.getLastLoginAt()).isNotNull();
         }
-        
+
         @Test
-        @DisplayName("Should change password for local user")
-        void shouldChangePasswordForLocalUser() {
-            // Given
+        @DisplayName("changePassword_whenLocalUser_thenUpdatesPasswordAndEmitsEvent")
+        void changePassword_whenLocalUser_thenUpdatesPasswordAndEmitsEvent() {
             User user = createLocalUser();
             user.clearDomainEvents();
-            // Valid BCrypt hash format
             HashedPassword newPassword = HashedPassword.fromHash(
-                "$2a$12$S.1w6jVHJWFP5q2J8V1xVeB1b.X6Z7q3K9L0M1N2O3P4Q5R6S7T8U"
-            );
-            
-            // When
+                    "$2a$12$S.1w6jVHJWFP5q2J8V1xVeB1b.X6Z7q3K9L0M1N2O3P4Q5R6S7T8U");
+
             user.changePassword(newPassword);
-            
-            // Then
-            assertEquals(newPassword, user.getPasswordHash());
-            
-            var events = user.getDomainEvents();
-            assertEquals(1, events.size());
-            assertInstanceOf(PasswordResetCompleted.class, events.get(0));
+
+            assertThat(user.getPasswordHash()).isEqualTo(newPassword);
+            assertThat(user.getDomainEvents()).hasSize(1);
+            assertThat(user.getDomainEvents().get(0)).isInstanceOf(PasswordResetCompleted.class);
         }
-        
+
         @Test
-        @DisplayName("Should not change password for OAuth user")
-        void shouldNotChangePasswordForOAuthUser() {
-            // Given
+        @DisplayName("changePassword_whenOAuthUser_thenThrowsInvalidPassword")
+        void changePassword_whenOAuthUser_thenThrowsInvalidPassword() {
             User user = createOAuthUser();
             HashedPassword newPassword = HashedPassword.fromHash(VALID_PASSWORD_HASH);
-            
-            // When/Then
-            assertThrows(InvalidPasswordException.class, () -> user.changePassword(newPassword));
+
+            assertThatThrownBy(() -> user.changePassword(newPassword))
+                    .isInstanceOf(InvalidPasswordException.class);
         }
-        
+
         @Test
-        @DisplayName("Should request password reset for local user")
-        void shouldRequestPasswordResetForLocalUser() {
-            // Given
+        @DisplayName("requestPasswordReset_whenLocalUser_thenEmitsPasswordResetRequestedEvent")
+        void requestPasswordReset_whenLocalUser_thenEmitsPasswordResetRequestedEvent() {
             User user = createLocalUser();
             user.clearDomainEvents();
             String token = "reset-token-123";
             LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
-            
-            // When
+
             user.requestPasswordReset(token, expiresAt);
-            
-            // Then
-            var events = user.getDomainEvents();
-            assertEquals(1, events.size());
-            assertInstanceOf(PasswordResetRequested.class, events.get(0));
-            
-            PasswordResetRequested event = (PasswordResetRequested) events.get(0);
-            assertEquals(token, event.token());
-            assertEquals(expiresAt, event.expiresAt());
+
+            assertThat(user.getDomainEvents()).hasSize(1);
+            assertThat(user.getDomainEvents().get(0)).isInstanceOf(PasswordResetRequested.class);
+
+            PasswordResetRequested event = (PasswordResetRequested) user.getDomainEvents().get(0);
+            assertThat(event.token()).isEqualTo(token);
+            assertThat(event.expiresAt()).isEqualTo(expiresAt);
         }
-        
+
         @Test
-        @DisplayName("Should not request password reset for OAuth user")
-        void shouldNotRequestPasswordResetForOAuthUser() {
-            // Given
+        @DisplayName("requestPasswordReset_whenOAuthUser_thenThrowsInvalidPassword")
+        void requestPasswordReset_whenOAuthUser_thenThrowsInvalidPassword() {
             User user = createOAuthUser();
-            
-            // When/Then
-            assertThrows(InvalidPasswordException.class, () ->
-                user.requestPasswordReset("token", LocalDateTime.now().plusHours(1))
-            );
+
+            assertThatThrownBy(() -> user.requestPasswordReset("token", LocalDateTime.now().plusHours(1)))
+                    .isInstanceOf(InvalidPasswordException.class);
         }
-        
+
         @Test
-        @DisplayName("Should verify email")
-        void shouldVerifyEmail() {
-            // Given
+        @DisplayName("verifyEmail_whenNotVerified_thenSetsEmailVerifiedTrue")
+        void verifyEmail_whenNotVerified_thenSetsEmailVerifiedTrue() {
             User user = createLocalUser();
-            assertFalse(user.isEmailVerified());
-            
-            // When
+            assertThat(user.isEmailVerified()).isFalse();
+
             user.verifyEmail();
-            
-            // Then
-            assertTrue(user.isEmailVerified());
+
+            assertThat(user.isEmailVerified()).isTrue();
         }
-        
+
         @Test
-        @DisplayName("Should deactivate and reactivate user")
-        void shouldDeactivateAndReactivateUser() {
-            // Given
+        @DisplayName("deactivate_whenActiveUser_thenIsActiveBecomesFalse")
+        void deactivate_whenActiveUser_thenIsActiveBecomesFalse() {
             User user = createLocalUser();
-            assertTrue(user.isActive());
-            
-            // When deactivate
+            assertThat(user.isActive()).isTrue();
+
             user.deactivate();
-            
-            // Then
-            assertFalse(user.isActive());
-            
-            // When reactivate
-            user.reactivate();
-            
-            // Then
-            assertTrue(user.isActive());
+
+            assertThat(user.isActive()).isFalse();
         }
-        
+
         @Test
-        @DisplayName("Should promote to admin")
-        void shouldPromoteToAdmin() {
-            // Given
+        @DisplayName("reactivate_whenInactiveUser_thenIsActiveBecomesTrue")
+        void reactivate_whenInactiveUser_thenIsActiveBecomesTrue() {
             User user = createLocalUser();
-            assertEquals(UserRole.USER, user.getRole());
-            assertFalse(user.isAdmin());
-            
-            // When
+            user.deactivate();
+            assertThat(user.isActive()).isFalse();
+
+            user.reactivate();
+
+            assertThat(user.isActive()).isTrue();
+        }
+
+        @Test
+        @DisplayName("promoteToAdmin_whenRegularUser_thenRoleBecomesAdmin")
+        void promoteToAdmin_whenRegularUser_thenRoleBecomesAdmin() {
+            User user = createLocalUser();
+            assertThat(user.getRole()).isEqualTo(UserRole.USER);
+            assertThat(user.isAdmin()).isFalse();
+
             user.promoteToAdmin();
-            
-            // Then
-            assertEquals(UserRole.ADMIN, user.getRole());
-            assertTrue(user.isAdmin());
+
+            assertThat(user.getRole()).isEqualTo(UserRole.ADMIN);
+            assertThat(user.isAdmin()).isTrue();
         }
     }
-    
+
     @Nested
     @DisplayName("Query Methods")
     class QueryMethods {
-        
+
         @Test
-        @DisplayName("Local user can authenticate with password")
-        void localUserCanAuthenticateWithPassword() {
-            // Given
+        @DisplayName("canAuthenticateWithPassword_whenLocalUser_thenReturnsTrue")
+        void canAuthenticateWithPassword_whenLocalUser_thenReturnsTrue() {
             User user = createLocalUser();
-            
-            // Then
-            assertTrue(user.canAuthenticateWithPassword());
+
+            assertThat(user.canAuthenticateWithPassword()).isTrue();
         }
-        
+
         @Test
-        @DisplayName("OAuth user cannot authenticate with password")
-        void oauthUserCannotAuthenticateWithPassword() {
-            // Given
+        @DisplayName("canAuthenticateWithPassword_whenOAuthUser_thenReturnsFalse")
+        void canAuthenticateWithPassword_whenOAuthUser_thenReturnsFalse() {
             User user = createOAuthUser();
-            
-            // Then
-            assertFalse(user.canAuthenticateWithPassword());
+
+            assertThat(user.canAuthenticateWithPassword()).isFalse();
         }
     }
-    
-    // Test Helpers
-    
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
     private User createLocalUser() {
-        Email email = Email.of(VALID_EMAIL);
-        HashedPassword password = HashedPassword.fromHash(VALID_PASSWORD_HASH);
-        return User.registerWithCredentials(email, VALID_NAME, password);
+        return User.registerWithCredentials(
+                Email.of(VALID_EMAIL),
+                VALID_NAME,
+                HashedPassword.fromHash(VALID_PASSWORD_HASH));
     }
-    
+
     private User createOAuthUser() {
-        Email email = Email.of(VALID_EMAIL);
         return User.registerWithOAuth(
-            email, VALID_NAME, null, AuthProvider.GOOGLE, "google-12345"
-        );
+                Email.of(VALID_EMAIL),
+                VALID_NAME,
+                null,
+                AuthProvider.GOOGLE,
+                "google-12345");
     }
 }
-

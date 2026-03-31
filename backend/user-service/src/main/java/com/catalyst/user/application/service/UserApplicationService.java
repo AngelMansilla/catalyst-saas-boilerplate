@@ -1,5 +1,9 @@
 package com.catalyst.user.application.service;
 
+import com.catalyst.shared.application.ports.JwtTokenPort;
+import com.catalyst.shared.domain.auth.LoginResponse;
+import com.catalyst.shared.domain.auth.TokenResponse;
+import com.catalyst.shared.domain.exception.AuthenticationException;
 import com.catalyst.user.application.dto.*;
 import com.catalyst.user.application.ports.input.*;
 import com.catalyst.user.application.ports.output.*;
@@ -16,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -38,7 +44,10 @@ public class UserApplicationService implements
         ResetPasswordUseCase,
         GetUserProfileUseCase,
         UpdateUserProfileUseCase,
-        DeleteUserUseCase {
+        DeleteUserUseCase,
+        LoginUseCase,
+        RefreshTokenUseCase,
+        LogoutUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(UserApplicationService.class);
 
@@ -51,6 +60,8 @@ public class UserApplicationService implements
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EventPublisher eventPublisher;
+    private final JwtTokenPort jwtTokenPort;
+    private final RefreshTokenPort refreshTokenPort;
 
     @Value("${user.password-reset.token-expiration-hours:24}")
     private int tokenExpirationHours;
@@ -59,11 +70,15 @@ public class UserApplicationService implements
             UserRepository userRepository,
             PasswordResetTokenRepository tokenRepository,
             PasswordEncoder passwordEncoder,
-            EventPublisher eventPublisher) {
+            EventPublisher eventPublisher,
+            JwtTokenPort jwtTokenPort,
+            RefreshTokenPort refreshTokenPort) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.eventPublisher = eventPublisher;
+        this.jwtTokenPort = jwtTokenPort;
+        this.refreshTokenPort = refreshTokenPort;
     }
 
     // ========================
@@ -413,6 +428,126 @@ public class UserApplicationService implements
         eventPublisher.publish(deletionEvent);
 
         log.info("User {} deleted successfully", userId);
+    }
+
+    // ========================
+    // LoginUseCase
+    // ========================
+
+    @Override
+    public LoginResponse login(com.catalyst.shared.domain.auth.LoginRequest request, String ipAddress) {
+        log.info("Login attempt for email: {}", request.email());
+
+        Email email = Email.of(request.email());
+
+        // Find user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.warn("Login failed: user not found - {}", request.email());
+                    return InvalidPasswordException.invalidCredentials();
+                });
+
+        // Check if user can authenticate with password (not OAuth-only)
+        if (!user.canAuthenticateWithPassword()) {
+            log.warn("Login failed: user uses OAuth provider - {}", request.email());
+            throw new InvalidPasswordException("Please use " + user.getProvider().getDisplayName() + " to sign in");
+        }
+
+        // Check if user is active
+        if (!user.isActive()) {
+            log.warn("Login failed: user not active - {}", request.email());
+            throw new UserNotActiveException();
+        }
+
+        // Validate password
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            log.warn("Login failed: invalid password - {}", request.email());
+            throw InvalidPasswordException.invalidCredentials();
+        }
+
+        // Record login and save
+        user.recordLogin(ipAddress);
+        User updatedUser = userRepository.save(user);
+
+        // Publish login event
+        user.getDomainEvents().forEach(event -> {
+            if (event instanceof UserLoggedIn userLoggedIn) {
+                eventPublisher.publish(userLoggedIn);
+            }
+        });
+
+        // Generate tokens
+        UUID userId = updatedUser.getId().getValue();
+        Set<String> roles = Set.of(updatedUser.getRole().getAuthority());
+        String accessToken = jwtTokenPort.generateAccessToken(userId, updatedUser.getEmail().getValue(), roles);
+        String refreshToken = jwtTokenPort.generateRefreshToken();
+        long ttlSeconds = jwtTokenPort.getRefreshTokenExpirationSeconds();
+
+        // Store refresh token in Redis
+        refreshTokenPort.store(refreshToken, userId, ttlSeconds);
+
+        log.info("User logged in successfully: {}", userId);
+
+        return LoginResponse.of(
+                accessToken,
+                refreshToken,
+                jwtTokenPort.getAccessTokenExpirationSeconds(),
+                LoginResponse.UserInfo.of(userId, updatedUser.getEmail().getValue(), updatedUser.getName(), roles)
+        );
+    }
+
+    // ========================
+    // RefreshTokenUseCase
+    // ========================
+
+    @Override
+    public TokenResponse refresh(String refreshToken) {
+        log.debug("Refresh token request");
+
+        // Look up userId from Redis
+        UUID userId = refreshTokenPort.findUserIdByToken(refreshToken)
+                .orElseThrow(() -> {
+                    log.warn("Refresh failed: token not found in Redis");
+                    return AuthenticationException.invalidToken();
+                });
+
+        // Load user from repository
+        User user = userRepository.findById(UserId.of(userId))
+                .orElseThrow(() -> {
+                    log.warn("Refresh failed: user not found for id {}", userId);
+                    return AuthenticationException.invalidToken();
+                });
+
+        // Check user is still active
+        if (!user.isActive()) {
+            log.warn("Refresh failed: user not active - {}", userId);
+            throw AuthenticationException.invalidToken();
+        }
+
+        // Generate new token pair
+        Set<String> roles = Set.of(user.getRole().getAuthority());
+        String newAccessToken = jwtTokenPort.generateAccessToken(userId, user.getEmail().getValue(), roles);
+        String newRefreshToken = jwtTokenPort.generateRefreshToken();
+        long ttlSeconds = jwtTokenPort.getRefreshTokenExpirationSeconds();
+
+        // Rotate: revoke old, store new
+        refreshTokenPort.delete(refreshToken);
+        refreshTokenPort.store(newRefreshToken, userId, ttlSeconds);
+
+        log.info("Tokens refreshed for user: {}", userId);
+
+        return TokenResponse.of(newAccessToken, newRefreshToken, jwtTokenPort.getAccessTokenExpirationSeconds());
+    }
+
+    // ========================
+    // LogoutUseCase
+    // ========================
+
+    @Override
+    public void logout(String refreshToken) {
+        log.debug("Logout request — revoking refresh token");
+        refreshTokenPort.delete(refreshToken);
+        log.info("Refresh token revoked");
     }
 
     // ========================
