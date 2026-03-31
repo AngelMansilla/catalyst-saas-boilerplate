@@ -3,7 +3,7 @@
 > Elite reusable boilerplate with robust payment system (Stripe) and authentication - Built to GrayHair Standard
 
 [![CI](https://github.com/AngelMansilla/Catalyst-Saas-Boilerplate/actions/workflows/ci.yml/badge.svg)](https://github.com/AngelMansilla/Catalyst-Saas-Boilerplate/actions/workflows/ci.yml)
-[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
+[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-green.svg)](https://spring.io/projects/spring-boot)
 [![Angular](https://img.shields.io/badge/Angular-21-red.svg)](https://angular.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
@@ -16,7 +16,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 ### 🌟 Engineering Highlights
 
 - **Clean Architecture**: Strict adherence to Hexagonal Architecture (Ports & Adapters) to isolate domain logic from external frameworks.
-- **Modern Concurrency**: Leveraging **Java 25 LTS Virtual Threads** for superior performance and resource efficiency.
+- **Modern Concurrency**: Leveraging **Java 21 LTS Virtual Threads** for superior performance and resource efficiency.
 - **Observability & Tracing**: Distributed tracing with **Correlation IDs** and structured **JSON logging** for enterprise monitoring (ELK/Datadog ready).
 - **Event-Driven Resilience**: Asynchronous communication via **Apache Kafka (KRaft mode)** for high availability and decoupled services.
 - **GDPR Compliance**: Native support for the "Right to Erasure" with automated user data deletion workflows.
@@ -27,7 +27,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 - 🔐 **Robust Authentication**: OIDC/OAuth2 Integration + JWT with Spring Security
 - 🏗️ **Hexagonal Architecture**: Clean, maintainable, and testable code
 - 📨 **Event-Driven**: Apache Kafka for asynchronous processing (Registration, Payments, Deletion)
-- ⚡ **High Performance**: Java 25 LTS Virtual Threads + Redis caching
+- ⚡ **High Performance**: Java 21 LTS Virtual Threads + Redis caching
 - 🎨 **Modern UI**: Angular 21 + Angular Material + Signals State Management
 - �️ **GDPR Compliant**: Built-in account deletion and data privacy flows
 - 📈 **Observable**: Correlation IDs tracing and structured JSON logging
@@ -36,7 +36,7 @@ Project Catalyst is a production-ready foundation for SaaS applications. It demo
 ## 🛠️ Tech Stack
 
 ### Backend
-- **Java 25 LTS** with Virtual Threads (Premier Support until 2030)
+- **Java 21 LTS** with Virtual Threads (Premier Support until 2028)
 - **Spring Boot 3.4.1** (Framework)
 - **Maven** (Build tool)
 - **PostgreSQL 16** (Database)

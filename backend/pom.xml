@@ -26,9 +26,9 @@
     </modules>
 
     <properties>
-        <java.version>25</java.version>
-        <maven.compiler.source>25</maven.compiler.source>
-        <maven.compiler.target>25</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- JaCoCo argLine placeholder (JaCoCo will populate this) -->
@@ -112,7 +112,7 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- Force JNA version for JDK 25 compatibility -->
+            <!-- Force JNA version for JDK 21 compatibility -->
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
                 <artifactId>jna</artifactId>
@@ -124,7 +124,7 @@
                 <version>${jna.version}</version>
             </dependency>
 
-            <!-- Mockito 5.x for Java 25 -->
+            <!-- Mockito 5.x for Java 21 -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
@@ -164,10 +164,9 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version>
                     <configuration>
-                        <!-- Include JaCoCo agent argLine + enable-preview and JNA flags for Java 25 -->
-                        <!-- Add Mockito agent to support inline mocking in Java 25 -->
+                        <!-- Include JaCoCo agent argLine + Mockito agent for Java 21 -->
                         <argLine>
-                            @{argLine} --enable-preview --enable-native-access=ALL-UNNAMED
+                            @{argLine}
                             -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.14.2/mockito-core-5.14.2.jar
                         </argLine>
                     </configuration>
